@@ -1,13 +1,14 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {useCity} from "../providers/CityProvider.tsx";
+import {apiFetch} from "../shared/apiFetch.ts";
 
 const key = import.meta.env.VITE_API_KEY;
 
 const Favourites = () => {
   const [favourites, setFavourites] = useState<Record<string, any>[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [result, setResult] = useState([]);
+  const [serachResult, setSearchResult] = useState([]);
   const { setCity } = useCity();
 
   useEffect(() => {
@@ -23,10 +24,8 @@ const Favourites = () => {
     if (!searchingQuery) return;
 
     try {
-      const res = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${searchingQuery}&limit=5&appid=${key}&lang=en`);
-      const data = await res.json();
-
-      setResult(data);
+      const data = await apiFetch("geo", "1.0", "direct", {q: searchingQuery, limit: 5});
+      setSearchResult(data);
     } catch (error) {
       throw new Error (`Error: ${error}`);
     }
@@ -38,17 +37,11 @@ const Favourites = () => {
     }
 
     if (inputRef.current?.value === "") {
-      setResult([]);
+      setSearchResult([]);
     }
   };
 
   const onAdd = (item: Record<string, any>) => {
-    const exists = favourites.some(
-      (fav) => fav.name === item.name && fav.country === item.country
-    );
-
-    if (exists) return;
-
     const updated = [...favourites, item];
     setFavourites(updated);
     localStorage.setItem("favorites", JSON.stringify(updated));
@@ -78,12 +71,18 @@ const Favourites = () => {
         </button>
       </div>
 
-      {result.length > 0 && (
+      {serachResult.length > 0 && (
         <div className="mt-4 space-y-2">
-          {result.map((item: Record<string, any>) => (
+          {serachResult.map((item: Record<string, any>) => (
             <div key={item.lat} className="flex items-center gap-5">
               <div className="border-none bg-gray-100 py-2 px-5 inline-block rounded">{item.name} {item.country}</div>
-              <button className="flex gap-3 items-center bg-blue-500 text-white py-2 px-3 rounded-md cursor-pointer active:bg-blue-700" onClick={() => onAdd(item)}>Add</button>
+              {favourites.some(fav => fav.name === item.name && fav.country === item.country) ? (
+                <div className="flex gap-3 items-center border-2 border-blue-500 bg-gray-300 text-blue-500 py-2 px-3 rounded-md">
+                  Added
+                </div>
+              ) : (
+                <button className="flex gap-3 items-center bg-blue-500 text-white py-2 px-3 rounded-md cursor-pointer active:bg-blue-700" onClick={() => onAdd(item)}>Add</button>
+              )}
             </div>
           ))}
         </div>
@@ -95,8 +94,11 @@ const Favourites = () => {
           <div className="mt-5 flex flex-col gap-3">
             {favourites.map((favourite) => (
               <div key={favourite.lon} className="flex items-center gap-5">
-                <Link to="/">
-                  <div onClick={() => setCity({name: favourite.name, lat: favourite.lat, lon:favourite.lon})} className="border-none bg-gray-100 py-2 px-5 inline-block rounded cursor-pointer hover:bg-gray-200 active:bg-gray-300">
+                <Link to={`/favourites/${favourite.name}`}>
+                  <div
+                    className="border-none bg-gray-100 py-2 px-5 inline-block rounded cursor-pointer hover:bg-gray-200 active:bg-gray-300"
+                    onClick={() => setCity({name: favourite.name, lat: favourite.lat, lon:favourite.lon})}
+                  >
                     {favourite.name} {favourite.country}
                   </div>
                 </Link>
