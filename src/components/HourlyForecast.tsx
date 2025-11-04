@@ -1,40 +1,33 @@
-import React, {useMemo} from 'react';
-import type {WeatherData, UnitsType, ForecastData} from "../shared/types.ts";
+import React from 'react';
+import type { UnitsType, WeatherData } from "../shared/types.ts";
+import {getIcon} from "../helpers/getIcon.ts";
+import {getUnits} from "../helpers/getUnits.ts";
 
 interface HourlyForecastProps {
-  forecast: ForecastData | null;
-  selectedDay: string | null,
-  selectedTime: number | null,
-  setSelectedTime: (selectedTime: number | null) => void,
+  selectedDay: WeatherData | null,
+  selectedTime: WeatherData | null,
+  setSelectedTime: (selectedTime: any | null) => void,
   units: UnitsType,
 }
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ forecast, selectedDay, selectedTime, setSelectedTime, units }) => {
-  const selectedDayForecasts = useMemo(() => {
-    if (!selectedDay || !forecast) return [];
-    return forecast.list.filter(item => item.dt_txt.startsWith(selectedDay));
-  }, [selectedDay, forecast]);
-
+const HourlyForecast: React.FC<HourlyForecastProps> = ({ selectedDay, selectedTime, setSelectedTime, units }) => {
   return (
     <div className="flex justify-around mt-5">
-      {selectedDayForecasts.map(hour => {
+      {selectedDay.forecasts.map(hour => {
         const time = new Date(hour.dt_txt).toLocaleTimeString("hy-AM", {
           hour: "2-digit",
           minute: "2-digit",
         });
 
-        const iconCode = hour.weather[0].icon;
-        const iconUrl = `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
-
         return (
           <div
             key={hour.dt}
-            className={`p-2 cursor-pointer hover:text-white  ${hour.dt === selectedTime ? "bg-red-500 text-white" : "hover:bg-red-400"} transition-colors duration-100 rounded`}
-            onClick={() => setSelectedTime(hour.dt)}
+            className={`p-2 font-semibold cursor-pointer hover:text-white  ${selectedTime !== null && hour.dt === selectedTime.dt ? "bg-red-500 text-white" : "hover:bg-red-400"} transition-colors duration-100 rounded`}
+            onClick={() => setSelectedTime(hour)}
           >
             {time}
-            <img src={iconUrl} alt={hour.weather[0].description} className="w-15" />
-            <div className="text-center font-bold">{Math.round(hour.main.temp)} {units === "metric" ? "°C" : "°F"}</div>
+            <img src={getIcon(hour.weather[0].icon)} alt={hour.weather[0].description} className="w-15" />
+            <div className="text-center font-normal">{Math.round(hour.main.temp)} {getUnits(units)}</div>
           </div>
         )
       })}

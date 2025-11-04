@@ -30,4 +30,11 @@ export interface ForecastData {
   };
 }
 
+export interface SearchData {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+}
+
 export type UnitsType = "metric" | "imperial";

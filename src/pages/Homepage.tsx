@@ -1,11 +1,11 @@
-import WeatherPage from "../components/WeatherPage.tsx";
+import WeatherInfo from "../components/WeatherInfo.tsx";
 import useGeolocation from "../hooks/useGeolocation.ts";
 
 const Homepage = () => {
   const coords = useGeolocation();
 
   return (
-    <WeatherPage coords={coords} />
+    <WeatherInfo coords={coords} />
   );
 };
 

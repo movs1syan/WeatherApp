@@ -1,45 +1,41 @@
-import React, { useMemo } from 'react';
-import type { ForecastData, WeatherData } from "../shared/types.ts";
+import React from 'react';
+import type {WeatherData, ForecastData, UnitsType} from "../shared/types.ts";
+import {getUnits} from "../helpers/getUnits.ts";
 
 interface DayForecastProps {
   forecast: ForecastData | null;
-  selectedDay: string | null,
-  setSelectedDay: (selectedDay: string | null) => void,
+  selectedDay: WeatherData | null,
+  setSelectedDay: (selectedDay: WeatherData | null) => void,
   setSelectedTime: (selectedTime: null) => void,
+  units: UnitsType,
 }
 
-const DailyForecast: React.FC<DayForecastProps> = ({ forecast, selectedDay, setSelectedDay, setSelectedTime }) => {
-  const groupedByDay = useMemo(() => {
-    return forecast?.list?.reduce((group, item) => {
-      const date = item.dt_txt.split(" ")[0];
-      if (!group[date]) group[date] = [];
-      group[date].push(item);
-
-      return group;
-    }, {} as Record<string, WeatherData[]>) || {}
-  }, [forecast]);
-
-  const fiveDays = useMemo(() => Object.entries(groupedByDay)
-    .map(([date, forecasts]) => ({
-      date,
-      forecasts,
-    })), [groupedByDay]);
-
+const DailyForecast: React.FC<DayForecastProps> = ({ forecast, selectedDay, setSelectedDay, setSelectedTime, units }) => {
   return (
     <div className="flex justify-between gap-10 mt-7">
-      {fiveDays.map((day) => (
-        <button
+      {forecast.map((day) => {
+        let temps: number[] = [];
+        day.forecasts.map((item) => {
+          temps.push(item.main.temp);
+        });
+
+        return (
+        <div
           key={day.date}
-          className={`border-none transition-colors duration-100 bg-gray-100 p-2 rounded mb-2 w-full cursor-pointer ${day.date === selectedDay ? "bg-gray-300" : "hover:bg-gray-200"}`}
-          onClick={() => {setSelectedDay(day.date); setSelectedTime(null)}}
+          className={`border-none text-center transition-colors duration-100 bg-gray-100 p-2 rounded mb-2 w-full cursor-pointer ${selectedDay !== null && day.date === selectedDay.date ? "bg-gray-300" : "hover:bg-gray-200"}`}
+          onClick={() => {setSelectedDay(day); setSelectedTime(null)}}
         >
-          {new Date(day.date).toLocaleDateString("hy-AM", {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-          })}
-        </button>
-      ))}
+          <div className="font-semibold">
+            {new Date(day.date).toLocaleDateString("hy-AM", {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            })}
+          </div>
+          <div>{Math.round(Math.max(...temps))} / {Math.round(Math.min(...temps))} {getUnits(units)}</div>
+        </div>
+        )}
+      )}
     </div>
   );
 };
