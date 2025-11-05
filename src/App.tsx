@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { UnitsProvider } from "./providers/UnitsProvider.tsx";
-import Navbar from "./components/Navbar.tsx";
-import Homepage from "./pages/Homepage.tsx";
-import Favourites from "./pages/Favourites.tsx";
-import SelectedCity from "./pages/SelectedCity.tsx";
+import { UnitsProvider } from "./providers/UnitsProvider";
+import Navbar from "./components/Navbar";
+import Homepage from "./pages/Homepage";
+import Favourites from "./pages/Favourites";
+import SelectedCity from "./pages/SelectedCity";
+import NotificationProvider from "./providers/NotificationProvider";
 
 function App () {
   return (
@@ -12,11 +13,13 @@ function App () {
       <Router>
         <UnitsProvider>
           <Navbar />
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/favourites" element={<Favourites />} />
-            <Route path="/favourites/:city" element={<SelectedCity />} />
-          </Routes>
+          <NotificationProvider>
+            <Routes>
+              <Route path="/" element={<Homepage />} />
+              <Route path="/favourites" element={<Favourites />} />
+              <Route path="/favourites/:city" element={<SelectedCity />} />
+            </Routes>
+          </NotificationProvider>
         </UnitsProvider>
       </Router>
     </div>

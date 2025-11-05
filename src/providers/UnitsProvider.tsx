@@ -1,5 +1,5 @@
 import {createContext, type ReactNode, useState} from "react";
-import type { UnitsType } from "../shared/types.ts";
+import type { UnitsType } from "../shared/types";
 
 interface UnitsProps {
   units: UnitsType,

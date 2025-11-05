@@ -1,47 +1,41 @@
 import React, {useEffect, useRef, useState} from 'react';
-import type {ForecastData, WeatherData} from "../shared/types.ts";
-import {apiFetch} from "../shared/apiFetch.ts";
-import Spinner from "./Spinner.tsx";
-import DetailedWeatherInfo from "../components/DetailedWeatherInfo.tsx";
-import DailyForecast from "../components/DailyForecast.tsx";
-import HourlyForecast from "../components/HourlyForecast.tsx";
-import {useUnits} from "../hooks/useUnits.tsx";
+import type {WeatherData, ForecastData, ForecastItemData} from "../shared/types";
+import {apiFetch} from "../shared/apiFetch";
+import Spinner from "./ui/Spinner";
+import DetailedWeatherInfo from "./DetailedWeatherInfo";
+import DailyForecast from "./DailyForecast";
+import HourlyForecast from "./HourlyForecast";
+import {useUnits} from "../hooks/useUnits";
+import {useNotification} from "../hooks/useNotification";
 
 interface WeatherInfoProps {
   coords: Record<string, string | number> | null,
 }
 
 const WeatherInfo: React.FC<WeatherInfoProps> = ({ coords }) => {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastData | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<number | null>(null);
-  const formattedDate = useRef<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const { units } = useUnits();
+  const { notify } = useNotification();
+
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastData>([]);
+  const [selectedDay, setSelectedDay] = useState<ForecastItemData | null>(null);
+  const [selectedTime, setSelectedTime] = useState<WeatherData | null>(null);
+  const [showDailyForecast, setShowDailyForecast] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const formattedDate = useRef<string>("");
 
   useEffect(() => {
     (async () => {
       try {
         if (coords) {
           setIsLoading(true);
-          const [currentData, forecastData] = await Promise.all([
-            apiFetch("data", "2.5", "weather", {
-              lat: coords.lat,
-              lon: coords.lon,
-              units,
-            }),
-            apiFetch("data", "2.5", "forecast", {
-              lat: coords.lat,
-              lon: coords.lon,
-              units,
-            }),
-            // throw Error()
+          const [localWeatherData, forecastData] = await Promise.all([
+            apiFetch({ lat: coords.lat, lon: coords.lon, units },"weather"),
+            apiFetch({ lat: coords.lat, lon: coords.lon, units }, "forecast"),
           ]);
 
-          const groupedByDay =
-            forecastData.list.reduce((group, item) => {
+          const groupedByDay: Record<string, WeatherData[]> =
+            forecastData.list.reduce((group: Record<string, WeatherData[]>, item: WeatherData ) => {
               const date = item.dt_txt.split(" ")[0];
               if (!group[date]) group[date] = [];
               group[date].push(item);
@@ -49,13 +43,23 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ coords }) => {
               return group;
             }, {} as Record<string, WeatherData[]>) || {};
 
-          const fiveDays = Object.entries(groupedByDay)
+          const fiveDaysForecast = Object.entries(groupedByDay)
             .map(([date, forecasts]) => ({
               date,
               forecasts,
             }));
 
-          const getTimeFromLocation = (currentData.dt + currentData.timezone) * 1000;
+          const selectedDayForecast = fiveDaysForecast.find(day => day.date === selectedDay?.date)
+          if(selectedDayForecast) {
+            setSelectedDay(selectedDayForecast)
+            const selectedTimeForecast = selectedDayForecast.forecasts.find(time => time.dt === selectedTime?.dt)
+
+            if(selectedTimeForecast) {
+              setSelectedTime(selectedTimeForecast)
+            }
+          }
+
+          const getTimeFromLocation = (localWeatherData.dt + localWeatherData.timezone) * 1000;
           formattedDate.current = new Intl.DateTimeFormat("hy-AM", {
             month: "short",
             day: "numeric",
@@ -64,11 +68,17 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ coords }) => {
             timeZone: "UTC",
           }).format(new Date(getTimeFromLocation));
 
-          setWeather(currentData);
-          setForecast(fiveDays);
+          setWeather(localWeatherData);
+          setForecast(fiveDaysForecast);
+
+          // throw new Error ("Failed to get daily forecast");
         }
       } catch (error) {
-        throw new Error(`HTTP Error! ${error}`);
+        notify({
+          type: "error",
+          message: "Error!",
+          description: `Data fetching failed: ${error}`,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -91,15 +101,13 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({ coords }) => {
           <h2 className="text-gray-700 text-2xl mt-5">5-day Forecast</h2>
         </div>
 
-        <DailyForecast forecast={forecast} selectedDay={selectedDay} setSelectedDay={setSelectedDay} setSelectedTime={setSelectedTime} units={units} />
+        <DailyForecast forecast={forecast} selectedDay={selectedDay} setSelectedDay={setSelectedDay} setSelectedTime={setSelectedTime} setShowDailyForecast={setShowDailyForecast} units={units} />
 
-        {selectedDay && (
-          <HourlyForecast selectedDay={selectedDay} selectedTime={selectedTime} setSelectedTime={setSelectedTime} units={units} />
-        )}
+        <HourlyForecast selectedDay={selectedDay} selectedTime={selectedTime} showDailyForecast={showDailyForecast} setSelectedTime={setSelectedTime} units={units} />
 
-        {selectedTime !== null && (
+
           <DetailedWeatherInfo weather={selectedTime} units={units} />
-        )}
+
       </>
     );
   }

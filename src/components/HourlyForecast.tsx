@@ -1,19 +1,20 @@
 import React from 'react';
-import type { UnitsType, WeatherData } from "../shared/types.ts";
-import {getIcon} from "../helpers/getIcon.ts";
-import {getUnits} from "../helpers/getUnits.ts";
+import type {ForecastItemData, UnitsType, WeatherData} from "../shared/types";
+import {getIcon} from "../helpers/getIcon";
+import {getUnits} from "../helpers/getUnits";
 
 interface HourlyForecastProps {
-  selectedDay: WeatherData | null,
+  selectedDay: ForecastItemData | null,
   selectedTime: WeatherData | null,
-  setSelectedTime: (selectedTime: any | null) => void,
+  showDailyForecast: boolean,
+  setSelectedTime: (selectedTime: WeatherData | null) => void,
   units: UnitsType,
 }
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ selectedDay, selectedTime, setSelectedTime, units }) => {
+const HourlyForecast: React.FC<HourlyForecastProps> = ({ selectedDay, selectedTime, showDailyForecast, setSelectedTime, units }) => {
   return (
-    <div className="flex justify-around mt-5">
-      {selectedDay.forecasts.map(hour => {
+    <div className={`flex justify-around mt-5 ${showDailyForecast ? "block" : "hidden"}`}>
+      {selectedDay?.forecasts.map(hour => {
         const time = new Date(hour.dt_txt).toLocaleTimeString("hy-AM", {
           hour: "2-digit",
           minute: "2-digit",

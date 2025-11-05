@@ -21,14 +21,12 @@ export interface WeatherData {
   };
 }
 
-export interface ForecastData {
-  list: WeatherData[];
-  city: {
-    name: string;
-    country: string;
-    timezone: number;
-  };
+export interface ForecastItemData {
+  date: string;
+  forecasts: WeatherData[]
 }
+
+export type ForecastData = ForecastItemData[];
 
 export interface SearchData {
   name: string;
@@ -37,4 +35,11 @@ export interface SearchData {
   country: string;
 }
 
-export type UnitsType = "metric" | "imperial";
+export interface NotificationType {
+  id: string;
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  description: string;
+}
+
+export type UnitsType = "metric" | "imperial" | string;

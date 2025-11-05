@@ -1,5 +1,5 @@
-import WeatherInfo from "../components/WeatherInfo.tsx";
-import useGeolocation from "../hooks/useGeolocation.ts";
+import WeatherInfo from "../components/WeatherInfo";
+import useGeolocation from "../hooks/useGeolocation";
 
 const Homepage = () => {
   const coords = useGeolocation();

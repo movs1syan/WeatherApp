@@ -1,13 +1,13 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {apiFetch} from "../shared/apiFetch.ts";
-import type { SearchData } from "../shared/types.ts";
-import SearchedItem from "../components/SearchedItem.tsx";
+import {apiFetch} from "../shared/apiFetch";
+import type { SearchData } from "../shared/types";
+import SearchedItem from "../components/SearchedItem";
 
 const Favourites = () => {
   const [favourites, setFavourites] = useState<Record<string, any>[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [searchResult, setSearchResult] = useState<SearchData[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const storedFavourites = localStorage.getItem("favorites");
@@ -22,7 +22,7 @@ const Favourites = () => {
     if (!searchingQuery) return;
 
     try {
-      const data = await apiFetch("geo", "1.0", "direct", {q: searchingQuery, limit: 5});
+      const data = await apiFetch( {q: searchingQuery, limit: 5}, "direct","geo", "1.0");
       setSearchResult(data);
     } catch (error) {
       console.error("Fetch failed:", error);

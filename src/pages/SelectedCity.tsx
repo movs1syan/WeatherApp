@@ -1,25 +1,27 @@
-import WeatherInfo from "../components/WeatherInfo.tsx";
-import {Link, useParams} from "react-router-dom";
-import {apiFetch} from "../shared/apiFetch.ts";
 import { useState, useEffect } from "react";
+import {Link, useParams} from "react-router-dom";
+import WeatherInfo from "../components/WeatherInfo";
+import {apiFetch} from "../shared/apiFetch";
 
 const SelectedCity = () => {
-  const [coords, setCoords] = useState({ lat: null, lon: null });
+  const [coords, setCoords] = useState<Record<string, string | number>>({});
   const { city } = useParams();
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await apiFetch("geo", "1.0", "direct", {q: city});
-        setCoords({
-          lat: res[0].lat,
-          lon: res[0].lon,
-        })
+        if (city) {
+          const res = await apiFetch({q: city}, "direct", "geo", "1.0");
+          setCoords({
+            lat: res[0].lat,
+            lon: res[0].lon,
+          })
+        }
       } catch (error) {
         console.error(`Failed fetching: ${error}`);
       }
     })();
-  }, [city]);
+  }, []);
 
   return (
     <>

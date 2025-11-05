@@ -1,7 +1,7 @@
 const KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export const apiFetch = async (type: string, version: string, endpoint: string, params: Record<string, number | string> = {}) => {
+export const apiFetch = async (params: Record<string, number | string> = {}, endpoint: string, type: string = "data", version: string = "2.5") => {
   const url = new URL(`${BASE_URL}/${type}/${version}/${endpoint}`);
 
   url.searchParams.set("appid", KEY);

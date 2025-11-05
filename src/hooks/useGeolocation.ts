@@ -4,7 +4,6 @@ const UseGeolocation = () => {
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   useEffect(() => {
-    // TODO: can we do this before rendering?
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;

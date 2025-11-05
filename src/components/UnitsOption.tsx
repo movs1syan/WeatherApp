@@ -1,16 +1,19 @@
 import React from 'react';
-import {getUnits} from "../helpers/getUnits.ts";
+import type {UnitsType} from "../shared/types";
+import { getUnits } from "../helpers/getUnits";
+import { useUnits } from "../hooks/useUnits";
 
-const UnitsOption = ({ units, setUnits, mode }) => {
+interface Props {
+  mode: UnitsType,
+}
 
-  const handleChange = (e: React.HTMLAttributes<HTMLInputElement>) => {
-    setUnits(e.target.value);
-  };
+const UnitsOption: React.FC<Props> = ({ mode }) => {
+  const { units, setUnits } = useUnits();
 
   return (
-    <label className={`${units === "metric" ? "bg-red-500 text-white": ""} px-4 cursor-pointer transition-colors duration-300 rounded-l`}>
-      <input name="metric" value="metric" type="radio" checked={units === "metric"} onChange={handleChange} className="hidden" />
-      {getUnits("metric")}
+    <label className={`px-4 cursor-pointer transition-colors duration-300 ${units === mode ? "bg-red-500 text-white": ""}`}>
+      <input value={mode} type="radio" checked={units === mode} onChange={(e) => setUnits(e.target.value)} className="hidden" />
+      {getUnits(mode)}
     </label>
   );
 };
