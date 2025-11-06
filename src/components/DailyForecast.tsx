@@ -7,11 +7,10 @@ interface DayForecastProps {
   selectedDay: ForecastItemData | null,
   setSelectedDay: (selectedDay: ForecastItemData | null) => void,
   setSelectedTime: (selectedTime: null) => void,
-  setShowDailyForecast: (showDailyForecast: boolean) => void,
   units: UnitsType,
 }
 
-const DailyForecast: React.FC<DayForecastProps> = ({ forecast, selectedDay, setSelectedDay, setSelectedTime, units, setShowDailyForecast }) => {
+const DailyForecast: React.FC<DayForecastProps> = ({ forecast, selectedDay, setSelectedDay, setSelectedTime, units }) => {
   return (
     <div className="flex justify-between gap-10 mt-7">
       {forecast?.map((day) => {
@@ -24,7 +23,7 @@ const DailyForecast: React.FC<DayForecastProps> = ({ forecast, selectedDay, setS
           <div
             key={day.date}
             className={`border-none text-center transition-colors duration-100 bg-gray-100 p-2 rounded mb-2 w-full cursor-pointer ${selectedDay !== null && day.date === selectedDay.date ? "bg-gray-300" : "hover:bg-gray-200"}`}
-            onClick={() => {setSelectedDay(day); setShowDailyForecast(true); setSelectedTime(null)}}
+            onClick={() => {setSelectedDay(day); setSelectedTime(null)}}
           >
             <div className="font-semibold">
               {new Date(day.date).toLocaleDateString("hy-AM", {

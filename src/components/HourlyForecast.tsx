@@ -6,14 +6,13 @@ import {getUnits} from "../helpers/getUnits";
 interface HourlyForecastProps {
   selectedDay: ForecastItemData | null,
   selectedTime: WeatherData | null,
-  showDailyForecast: boolean,
   setSelectedTime: (selectedTime: WeatherData | null) => void,
   units: UnitsType,
 }
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ selectedDay, selectedTime, showDailyForecast, setSelectedTime, units }) => {
+const HourlyForecast: React.FC<HourlyForecastProps> = ({ selectedDay, selectedTime, setSelectedTime, units }) => {
   return (
-    <div className={`flex justify-around mt-5 ${showDailyForecast ? "block" : "hidden"}`}>
+    <div className={`flex justify-around mt-5 `}>
       {selectedDay?.forecasts.map(hour => {
         const time = new Date(hour.dt_txt).toLocaleTimeString("hy-AM", {
           hour: "2-digit",

@@ -2,26 +2,32 @@ import { useState, useEffect } from "react";
 import {Link, useParams} from "react-router-dom";
 import WeatherInfo from "../components/WeatherInfo";
 import {apiFetch} from "../shared/apiFetch";
+import {useNotification} from "../hooks/useNotification";
 
 const SelectedCity = () => {
   const [coords, setCoords] = useState<Record<string, string | number>>({});
   const { city } = useParams();
+  const { notify } = useNotification();
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (city) {
-          const res = await apiFetch({q: city}, "direct", "geo", "1.0");
-          setCoords({
-            lat: res[0].lat,
-            lon: res[0].lon,
-          })
-        }
-      } catch (error) {
-        console.error(`Failed fetching: ${error}`);
-      }
-    })();
+    getCoords().catch((error => {
+      notify({
+        type: "error",
+        message: "Error!",
+        description: `Data fetching failed: ${error}`,
+      });
+    }));
   }, []);
+
+  const getCoords = async () => {
+    if (city) {
+      const res = await apiFetch({q: city}, "direct", "geo", "1.0");
+      setCoords({
+        lat: res[0].lat,
+        lon: res[0].lon,
+      })
+    }
+  };
 
   return (
     <>

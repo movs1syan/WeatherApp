@@ -9,7 +9,6 @@ interface DetailedWeatherInfoProps {
 }
 
 const DetailedWeatherInfo: React.FC<DetailedWeatherInfoProps> = ({ weather, units }) => {
-  console.log(weather, "weather");
   return (
     <>
       {weather && (<>
